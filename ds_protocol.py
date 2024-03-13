@@ -53,10 +53,10 @@ def extract_json(json_msg: str) -> msg_info:
     return msg_info_1
 
 
-def join(server: str, port: int, username: str, password: str, token=""):
+def join(server: str, port: int, username: str, password: str):
     username = username.strip()
     if username != "" and len(username) > 1:
-        return dsc.send(server=server, port=port, username=username, password=password, message="", bio=None)
+        return dsc.send(server=server, port=port, username=username, password=password, message="", bio=None, extra=None)
     else:
         print(f"A username cannot be only whitespaces, empty, or a single character. Please try again.")
  
@@ -65,7 +65,7 @@ def post(server: str, port: int, username: str, password: str, message: str):
     message = message.strip()
     if message != "" and len(message) > 1:
         print(f"Your message [{message}] was posted")
-        return dsc.send(server=server, port=port, username=username, password=password, message=message)
+        return dsc.send(server=server, port=port, username=username, password=password, message=message, extra=None)
     else:
         print("You cannot post empty or whitespace only posts or single character. Please Try again.")
         return False
@@ -79,3 +79,9 @@ def bio(server: str, port: int, username: str, password: str, bio: str):
     else:
         print("You cannot have an empty or only whitespace bio or single character. Please try again.")
         return dsc.send(server=server, port=port, username=username, password=password, message="", bio=bio)
+
+def dm(server: str, port: int, username: str, password: str, message: str, extra: str):
+    return dsc.send(server=server, port=port, username=username, password=password, message=message, bio=None, extra=extra)
+
+def request_messages(server: str, port: int, username: str, password: str, extra: str):
+    return dsc.send(server=server, port=port, username=username, password=password, message="", bio=None, extra=extra)

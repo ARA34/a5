@@ -56,7 +56,7 @@ def connect_to_server(host: str, port: int) -> socket.socket:
 
 
 def send(server: str, port: int, username: str,
-         password: str, message: str, bio: str = None):
+         password: str, message: str, extra: str, bio: str = None):
     '''
     The send function joins a ds server and sends a message, bio, or both
     :param server: The ip address for the ICS 32 DS server.
@@ -76,19 +76,30 @@ def send(server: str, port: int, username: str,
         usr_token = get_token(_conn, username, password)
 
         sending_two = False
-        if (username and password != "") and (message == "") and bio is None:
+        if (username and password != "") and (message == "") and bio is None and extra is None:
             json_msg = {"join":
                         {"username": username,
                          "password": password,
                          "token": ""}}
-        elif message != "" and bio is None:
+        elif message != "" and bio is None and extra is None:
             json_msg = {"token": usr_token,
                         "post": {"entry": message,
                                  "timestamp": str(time.time())}}
-        elif message == "" and bio != "":
+        elif message == "" and bio != "" and extra is None:
             json_msg = {"token": usr_token,
                         "bio": {"entry": bio,
                                 "timestamp": str(time.time())}}
+        elif extra is not None:
+            # either direct message sending or requesting
+            if extra == "new":
+                json_msg = {"token":usr_token, "directmessage": "new"}
+            elif extra == "all":
+                json_msg = {"token":usr_token, "directmessage": "all"}
+            else:
+                json_msg = {"token":usr_token,
+                            "directmessage": {"entry": message,
+                                              "recipient":extra,
+                                              "timestamp": str(time.time())}}
         elif message != "" and bio != "":
             sending_two = True
         else:
