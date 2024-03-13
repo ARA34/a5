@@ -1,6 +1,7 @@
 import ds_client as dsc
 import ds_protocol as dsp
 from Profile import Profile
+import ds_messenger as dsm
 
 # Send a directmessage to another DS user (in the example bellow, ohhimark)
 # {"token":"user_token", "directmessage": {"entry": "Hello World!","recipient":"ohhimark", "timestamp": "1603167689.3928561"}}
@@ -30,11 +31,14 @@ def main():
     #                             password=melon_musk_2.password,
     #                             message="bruhreally21")
     
-    print(dsp.dm(server=server_ip, port=PORT, username=melon_musk.username, password=melon_musk.password, message="new", extra="melonmusk2"))
-    print(dsp.request_messages(server=server_ip, port=PORT, username=melon_musk_2.username, password=melon_musk_2.password, extra="new"))
+    # print(dsp.dm(server=server_ip, port=PORT, username=melon_musk.username, password=melon_musk.password, message="new", extra="melonmusk2"))
+    # print(dsp.request_messages(server=server_ip, port=PORT, username=melon_musk_2.username, password=melon_musk_2.password, extra="new"))
     
     # DM: melonmusk --> melonmusk2
     # print(dsp.dm(server="168.235.86.101", port=PORT, username=melon_musk.username, password=melon_musk.password, message="hello there", extra="melonmusk2"))
+
+    melonmusk_dsm = dsm.DirectMessenger(server_ip, melon_musk.username, melon_musk.password)
+    melon_musk_dsm.send()
 
 if __name__ == "__main__":
     main()
