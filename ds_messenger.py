@@ -57,22 +57,20 @@ class DirectMessage:
         """
         self.message = message
     
-    def send_dm(self):
+    def format_dm(self, token):
         """
-        formats json_msg so that it can send a dm
-        """
-        pass
-
-    def request_dm(self):
-        """
-        formats json_msg so that it can request dm messages from server
+        formats json_msg so that it can send a dm or request the latest dm or all the dms
         """
         if self.recipient == "new":
-            json_msg = {}
-            pass
+            json_msg = {"token": token, "directmessage": "new"}
         elif self.recipient == "all":
-            pass
-        return 
+            json_msg = {"token": token, "directmessage": "all"}
+        else:
+            json_msg = {"token":token,
+                                "directmessage": {"entry": self.message,
+                                                  "recipient":self.recipient,
+                                                  "timestamp": str(time.time())}}
+        return json_msg
 
 
 
@@ -81,12 +79,12 @@ class DirectMessenger:
     def __init__(self, dsuserver=None, username=None, password=None):
         self.token = None
         
-        self.dsuserver = dsuserver
+        self.dsuserver = dsuserver # required
         self._conn = None # connection namedtuple
         
-        self.username = username
-        self.password = password
-        self.bio = None
+        self.username = username # required
+        self.password = password # required
+        self.bio = None # optional
         
     def get_conn(self):
         return self._conn
@@ -105,6 +103,7 @@ class DirectMessenger:
                 print("Couldn't connect to server")
                 return
             self.init_conn(sock) # _conn is set
+            self.set_token() # token is set
             sending_two = False
 
             if (self.username and self.password != "") and (message == "") and self.bio is None and recipient is None:
@@ -125,18 +124,11 @@ class DirectMessenger:
                                     "timestamp": str(time.time())}}
             elif recipient is not None:
                 # sending dm (to recipient) or recieving dm(s)(for you)
-                if recipient == "new":
-                    # requesting latest dm sent to you --> top of stack
-                    json_msg = {"token":self.token, "directmessage": "new"}
-                elif recipient == "all":
-                    # requesting all dms sent to you
-                    json_msg = {"token":self.token, "directmessage": "all"}
-                else:
-                    # sending dm to recipient
-                    json_msg = {"token":self.token,
-                                "directmessage": {"entry": message,
-                                                  "recipient":recipient,
-                                                  "timestamp": str(time.time())}}
+                direct_message = DirectMessage()
+                direct_message.set_recipient(recipient)
+                direct_message.set_message(message)
+                json_msg = direct_message.format_dm(self.token)
+
             elif message != "" and self.bio != "":
                 sending_two = True
             else:
@@ -174,11 +166,6 @@ class DirectMessenger:
                 return False
         except Exception as ex:
             return ("An error occured while sending. ", ex)
-
-            
-
-        except Exception as ex:
-            print(f"send: {ex}")
 
     def retrieve_new(self) -> list:
         # must return a list of DirectMessage objects containing all new messages
@@ -231,5 +218,14 @@ class DirectMessenger:
             print(f"connect_server: {ex}")
             return None
         
-    def get_token(self):
+    def set_token(self) -> None:
+        join_msg = {"join":
+                    {"username": self.username,
+                    "password": self.password,
+                    "token": ""}}
+        join_msg = json.dumps(join_msg)
+        self.write_command(self.get_conn(), join_msg)
+        resp = self.read_command(self.get_conn())
+        parsed_resp = extract_json(resp)
+        self.token = str(parsed_resp.token)
 
