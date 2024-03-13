@@ -42,8 +42,13 @@ def extract_json(json_msg: str) -> msg_info:
     try:
         json_obj = json.loads(json_msg)
         vals = list(json_obj["response"].values())
+        keys = list(json_obj["response"].keys())
+        if "message" in keys:
+            m = "message"
+        elif "messages" in keys:
+            m = "messages"
         type = json_obj["response"]["type"]
-        message = json_obj["response"]["message"]
+        message = json_obj["response"][m]
         msg_info_1 = msg_info(type, message, "")
         if len(vals) == 3:
             token = json_obj["response"]["token"]
