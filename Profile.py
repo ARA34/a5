@@ -16,8 +16,8 @@
 
 # Profile.py
 
-import json, time
 from pathlib import Path
+from ds_messenger import *
 
 
 """
@@ -102,6 +102,10 @@ class Profile:
         self.password = password # REQUIRED
         self.bio = ''            # OPTIONAL
         self._posts = []         # OPTIONAL
+
+        self.friends = []
+        self.new_messages = []
+        self.all_messages = []
     
     """
 
@@ -155,6 +159,22 @@ class Profile:
     Raises DsuFileError
 
     """
+
+    def set_new_messages(self):
+        """
+        Uses the function from ds_messenger to retrieve new messages.
+        """
+        dsm = DirectMessenger(dsuserver=self.dsuserver,username=self.username,password=self.password)
+        self.new_messages = dsm.retrieve_new()
+        
+
+    def set_all_messages(self):
+        """
+        Uses the function from ds_messenger to retrieve all messages.
+        """
+        dsm = DirectMessenger(dsuserver=self.dsuserver,username=self.username,password=self.password)
+        self.all_messages = dsm.retrieve_all()
+
     def save_profile(self, path: str) -> None:
         p = Path(path)
 

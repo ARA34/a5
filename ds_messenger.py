@@ -87,7 +87,7 @@ class DirectMessenger:
         
         self.username = username # required
         self.password = password # required
-        self.bio = None # optional
+        self.bio = "" # optional
         self.data = None
         
     def get_conn(self):
@@ -95,6 +95,14 @@ class DirectMessenger:
     
     def set_bio(self, bio: str) -> None:
         self.bio = bio
+
+    def get_details(self):
+        print(self.dsuserver)
+        print(self.username)
+        print(self.password)
+        print(self.token)
+        print(self.data)
+        print(self._conn)
 
     def send(self, message:str, recipient:str) -> bool:
         """
@@ -109,8 +117,9 @@ class DirectMessenger:
             self.init_conn(sock) # _conn is set
             self.set_token() # token is set
             sending_two = False
+            
 
-            if (self.username and self.password != "") and (message == "") and self.bio is None and recipient is None:
+            if (self.username and self.password != "") and (message == "") and self.bio == "" and recipient is None:
                 # joining server
                 json_msg = {"join":
                             {"username": self.username,
@@ -135,8 +144,7 @@ class DirectMessenger:
 
             elif message != "" and self.bio != "":
                 sending_two = True
-            else:
-                print("Something went wrong, sending two")
+            
             if sending_two:
                 json_msg_1 = {"token": self.token,
                           "post": {"entry": message,
@@ -159,6 +167,7 @@ class DirectMessenger:
                 else:
                     satisfy = ERROR
             else:
+                print(json_msg)
                 json_msg = json.dumps(json_msg)
                 self.write_command(json_msg)
                 response = self.read_command()
@@ -173,7 +182,7 @@ class DirectMessenger:
             return ("An error occured while sending. ", ex)
 
     def join(self):
-        self.send(message="",recipient=None)
+        return self.send(message="",recipient=None)
 
     def retrieve_new(self) -> list:
         # must return a list of DirectMessage objects containing all new messages

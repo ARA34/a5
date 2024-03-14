@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from typing import Text
+from ds_messenger import DirectMessenger
+import ds_protocol as dsp
 
 
 class Body(tk.Frame):
@@ -93,7 +95,7 @@ class Footer(tk.Frame):
             self._send_callback()
 
     def _draw(self):
-        save_button = tk.Button(master=self, text="Send", width=20)
+        save_button = tk.Button(master=self, text="Send", width=20, command=self.send_click())
         # You must implement this.
         # Here you must configure the button to bind its click to
         # the send_click() function.
@@ -130,6 +132,11 @@ class NewContactDialog(tk.simpledialog.Dialog):
         # such that when the user types, the only thing that appears are
         # * symbols.
         #self.password...
+        self.password_entry = tk.Label(frame, width=30, text="Password")
+        self.password_entry.pack()
+        self.password_entry = tk.Entry(frame, width=30)
+        self.password_entry.insert(tk.END, self.pwd)
+        self.password_entry.pack()
 
 
     def apply(self):
@@ -149,6 +156,7 @@ class MainApp(tk.Frame):
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
         #self.direct_messenger = ... continue!
+        self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
 
         # After all initialization is complete,
         # call the _draw method to pack the widgets
@@ -158,14 +166,15 @@ class MainApp(tk.Frame):
 
     def send_message(self):
         # You must implement this!
-        pass
+        dsp.dm(self.direct_messenger, message="16", recipient=self.recipient) # TODO: fix this to actual message
 
     def add_contact(self):
         # You must implement this!
         # Hint: check how to use tk.simpledialog.askstring to retrieve
         # the name of the new contact, and then use one of the body
         # methods to add the contact to your contact list
-        pass
+        user_input = tk.simpledialog.askstring("Input", "Enter the name of a profile: ")
+        self.body.insert_contact(user_input)
 
     def recipient_selected(self, recipient):
         self.recipient = recipient
@@ -179,14 +188,16 @@ class MainApp(tk.Frame):
         # You must implement this!
         # You must configure and instantiate your
         # DirectMessenger instance after this line.
+        self.direct_messenger = dsp.join(self.direct_messenger) #DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+        
 
     def publish(self, message:str):
         # You must implement this!
-        pass
+        dsp.post(self.direct_messenger, message=message)
 
     def check_new(self):
         # You must implement this!
-        pass
+        dsp.request_messages(self.direct_messenger, self.recipient)
 
     def _draw(self):
         # Build a menu and add it to the root frame.

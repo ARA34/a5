@@ -14,7 +14,8 @@ from collections import namedtuple
 import socket
 import Profile
 import time
-import ds_client as dsc
+import ds_client as dsc # TODO: REPLACE
+import ds_messenger as dsm
 
 class DSPServerError(Exception):
   pass
@@ -58,35 +59,43 @@ def extract_json(json_msg: str) -> msg_info:
     return msg_info_1
 
 
-def join(server: str, port: int, username: str, password: str):
-    username = username.strip()
+def join(dsm_object: dsm.DirectMessenger):
+    username = dsm_object.username.strip()
     if username != "" and len(username) > 1:
-        return dsc.send(server=server, port=port, username=username, password=password, message="", bio=None, extra=None)
+        return dsm_object.join()
     else:
         print(f"A username cannot be only whitespaces, empty, or a single character. Please try again.")
  
 
-def post(server: str, port: int, username: str, password: str, message: str):
+def post(dsm_object: dsm.DirectMessenger, message: str):
     message = message.strip()
     if message != "" and len(message) > 1:
         print(f"Your message [{message}] was posted")
-        return dsc.send(server=server, port=port, username=username, password=password, message=message, extra=None)
+        dsm_object.send(message=message, recipient=None)
     else:
         print("You cannot post empty or whitespace only posts or single character. Please Try again.")
-        return False
 
 
-def bio(server: str, port: int, username: str, password: str, bio: str):
+def bio(dsm_object: dsm.DirectMessenger, bio: str):
     bio = bio.strip()
     if bio != "" and len(bio) > 1:
         print(f"Your bio was changed to [{bio}]")
-        return dsc.send(server=server, port=port, username=username, password=password, message ="", bio=bio)
+        dsm_object.set_bio(bio)
+        dsm_object.send(message="", recipient=None) # but self.bio != "" --> might be problem
     else:
         print("You cannot have an empty or only whitespace bio or single character. Please try again.")
-        return dsc.send(server=server, port=port, username=username, password=password, message="", bio=bio)
+        dsm_object.send(message="", recipient=None) # either way still runs
 
-def dm(server: str, port: int, username: str, password: str, message: str, extra: str):
-    return dsc.send(server=server, port=port, username=username, password=password, message=message, bio=None, extra=extra)
+def dm(dsm_object: dsm.DirectMessenger, message: str, recipient: str):
+    message = message.strip()
+    if message != "" and len(message) > 1:
+        return dsm_object.send(message=message, recipient=recipient)
+    else:
+        print("You cannot post empty or whitespace only posts or single character. Please Try again.")
 
-def request_messages(server: str, port: int, username: str, password: str, extra: str):
-    return dsc.send(server=server, port=port, username=username, password=password, message="", bio=None, extra=extra)
+def request_messages(dsm_object: dsm.DirectMessenger, recipient: str):
+    recipient = recipient.strip()
+    if recipient != "" and len(recipient) > 1:
+        dsm_object.send(message="", recipient=recipient)
+    else:
+        print("The recipient cannot be whitespace or a single character. Please try again.")
