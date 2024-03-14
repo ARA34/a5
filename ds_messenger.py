@@ -31,6 +31,7 @@ def extract_json(json_msg: str) -> msg_info:
         message = json_obj["response"][m]
         msg_info_1 = msg_info(type, message, "")
         if len(vals) == 3:
+            # token exists
             token = json_obj["response"]["token"]
             msg_info_1 = msg_info(type, message, token)
     except json.JSONDecodeError:
@@ -62,8 +63,10 @@ class DirectMessage:
         formats json_msg so that it can send a dm or request the latest dm or all the dms
         """
         if self.recipient == "new":
+            # requests messages sent in this session to user
             json_msg = {"token": token, "directmessage": "new"}
         elif self.recipient == "all":
+            # requests all messages ever sent to this user
             json_msg = {"token": token, "directmessage": "all"}
         else:
             json_msg = {"token":token,
@@ -85,6 +88,7 @@ class DirectMessenger:
         self.username = username # required
         self.password = password # required
         self.bio = None # optional
+        self.data = None
         
     def get_conn(self):
         return self._conn
@@ -141,13 +145,13 @@ class DirectMessenger:
                           "bio": {"entry": self.bio,
                                   "timestamp": str(time.time())}}
                 json_msg_1 = json.dumps(json_msg_1)
-                self.write_command(self.get_conn(), json_msg_1)
-                response_1 = self.read_command(self.get_conn())
+                self.write_command(json_msg_1)
+                response_1 = self.read_command()
                 parsed_r1 = extract_json(response_1)
                 resp_1_type = parsed_r1.type
                 json_msg_2 = json.dumps(json_msg_2)
-                self.write_command(self.get_conn(), json_msg_2)
-                response_2 = self.read_command(self.get_conn())
+                self.write_command(json_msg_2)
+                response_2 = self.read_command()
                 parsed_r2 = extract_json(response_2)
                 resp_2_type = parsed_r2.type
                 if resp_1_type == OK and resp_2_type == OK:
@@ -156,9 +160,10 @@ class DirectMessenger:
                     satisfy = ERROR
             else:
                 json_msg = json.dumps(json_msg)
-                self.write_command(self.get_conn(), json_msg)
-                response = self.read_command(self.get_conn())
+                self.write_command(json_msg)
+                response = self.read_command()
                 parsed_resp = extract_json(response)
+                self.data = parsed_resp.message
                 satisfy = parsed_resp.type
             if satisfy == OK:
                 return True
@@ -167,13 +172,28 @@ class DirectMessenger:
         except Exception as ex:
             return ("An error occured while sending. ", ex)
 
+    def join(self):
+        self.send(message="",recipient=None)
+
     def retrieve_new(self) -> list:
         # must return a list of DirectMessage objects containing all new messages
-        pass
+        """
+        retrives the new messages from
+        """
+        self.send(message="", recipient="new") # sets the data attribute to not None
+        dict_messages = self.data
+        output_messages = list(map(lambda d: d["message"], dict_messages))
+        return output_messages
 
     def retrieve_all(self) -> list:
         # must return a list of DirectMessage objects containing all messages
-        pass
+        """
+        retrives all messages every to be send to this user
+        """
+        self.send(message="", recipient="all")
+        dict_messages = self.data
+        output_messages = list(map(lambda d: d["message"], dict_messages))
+        return output_messages
 
     def init_conn(self, sock: socket) -> None:
         """
@@ -195,7 +215,8 @@ class DirectMessenger:
         Pushes information to server
         """
         try:
-            self._conn.write(cmd + "\r\n")
+            self.get_conn().send.write(cmd + "\r\n")
+            self.get_conn().send.flush()
         except Exception as ex:
             print(f"write_command: {ex}")
 
@@ -203,7 +224,7 @@ class DirectMessenger:
         """
         Gets information from server
         """
-        cmd = self._conn.readline()
+        cmd = self.get_conn().recv.readline()
         return cmd
 
     def connect_server(self, host: str, port: int):
@@ -224,8 +245,8 @@ class DirectMessenger:
                     "password": self.password,
                     "token": ""}}
         join_msg = json.dumps(join_msg)
-        self.write_command(self.get_conn(), join_msg)
-        resp = self.read_command(self.get_conn())
+        self.write_command(join_msg)
+        resp = self.read_command()
         parsed_resp = extract_json(resp)
         self.token = str(parsed_resp.token)
 

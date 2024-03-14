@@ -1,4 +1,3 @@
-import ds_client as dsc
 import ds_protocol as dsp
 from Profile import Profile
 import ds_messenger as dsm
@@ -9,6 +8,7 @@ import ds_messenger as dsm
 
 
 # create two people
+
 def main():
     server_ip = "168.235.86.101"
     PORT = 3021
@@ -38,7 +38,13 @@ def main():
     # print(dsp.dm(server="168.235.86.101", port=PORT, username=melon_musk.username, password=melon_musk.password, message="hello there", extra="melonmusk2"))
 
     melonmusk_dsm = dsm.DirectMessenger(server_ip, melon_musk.username, melon_musk.password)
-    melon_musk_dsm.send()
+    # melonmusk_dsm.send(message="1", recipient="melonmusk2") # sending dm 1
+    # melonmusk_dsm.send(message = "5", recipient="melonmusk2") # sending dm 2
+    # melonmusk_dsm.send(message = "6", recipient="melonmusk2") # sending dm 2
+    
+    melonmusk2_dsm = dsm.DirectMessenger(server_ip, melon_musk_2.username, melon_musk_2.password)
+    # print(melonmusk2_dsm.send(message="",recipient="new")) # recieving dm, sets data to (new messages)
+    print(melonmusk2_dsm.retrieve_all())
 
 if __name__ == "__main__":
     main()
