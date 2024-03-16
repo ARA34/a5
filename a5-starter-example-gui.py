@@ -119,21 +119,21 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.server = user_input
 
     def body(self, frame):
+        # frame = tk.Tk()
+        # frame=self.root
 
         self.server_label = tk.Label(frame, width=30, text="DS Server Address")
         self.server_label.pack()
-        
+
         self.server_entry = tk.Entry(frame, width=30)
-        print(f"END: {tk.END}")
-        print(f"Server: {self.server}")
-        self.server_entry.insert(tk.END, self.server)
+        self.server_entry.insert(tk.END, "")
         self.server_entry.pack()
 
         self.username_label = tk.Label(frame, width=30, text="Username")
         self.username_label.pack()
 
         self.username_entry = tk.Entry(frame, width=30)
-        self.username_entry.insert(tk.END, self.user)
+        self.username_entry.insert(tk.END, "")
         self.username_entry.pack()
 
         # You need to implement also the region for the user to enter
@@ -147,7 +147,7 @@ class NewContactDialog(tk.simpledialog.Dialog):
 
         self.password_entry = tk.Entry(frame, width=30)
         self.password_entry['show'] = '*'
-        self.password_entry.insert(tk.END, self.pwd)
+        self.password_entry.insert(tk.END, "")
         self.password_entry.pack()
 
 
@@ -198,10 +198,9 @@ class MainApp(tk.Frame):
         self.recipient = recipient
 
     def configure_server(self):
-        ud = NewContactDialog(root=self.root)
-
-        ud.__init__(root=self.root, title="Configure Account",
-                              user=self.username, pwd=self.password, server=self.server)
+        ud = NewContactDialog(self.root)
+        # ud.__init__(root=self.root, title="Configure Account",
+        #                       user=self.username, pwd=self.password, server=self.server)
 
         # AT This point self.server is empty
 
