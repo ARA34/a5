@@ -15,7 +15,21 @@ def create_profile_folder() -> str:
         new_path.mkdir(parents=True, exist_ok=True)
     return str(new_path)
 
+def create_profile():
+    """
+    Creates a new profile and returns the instance of the profile.
+    """
+    srv_ip = input("Enter the server IP: ")
+    username = input("Enter the username: ")
+    password = input("Enter the password: ")
+    new_profile = Profile(dsuserver=srv_ip, username=username, password=password)
+    store_profile(new_profile)
+    
+
 def store_profile(profile: Profile):
+    """
+    Stores the profile in the dsu_profiles folder.
+    """
     folder_path = Path(create_profile_folder())
     extension = profile.username + ".dsu"
     new_path = folder_path / extension
@@ -23,10 +37,10 @@ def store_profile(profile: Profile):
     profile.save_profile(path=new_path)
 
 # structure for saving messages
-p1 = Profile(dsuserver="168.235.86.101", username="melonmusk2", password="XA123")
-melonmusk_dsm = DirectMessenger("168.235.86.101", "melonmusk", "XA123")
-melonmusk_dsm.send(message="16", recipient="melonmusk2") # sending dm 1
-p1.set_new_messages()
-p1.set_all_messages()
-time.sleep(1)
-store_profile(p1)
+# p1 = Profile(dsuserver="168.235.86.101", username="melonmusk2", password="XA123")
+# melonmusk_dsm = DirectMessenger("168.235.86.101", "melonmusk", "XA123")
+# melonmusk_dsm.send(message="16", recipient="melonmusk2") # sending dm 1
+# p1.set_new_messages()
+# p1.set_all_messages()
+# time.sleep(1)
+# store_profile(p1)

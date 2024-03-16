@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog
 from typing import Text
 from ds_messenger import DirectMessenger
 import ds_protocol as dsp
+import file_handler as fh
 
 
 class Body(tk.Frame):
@@ -95,7 +96,7 @@ class Footer(tk.Frame):
             self._send_callback()
 
     def _draw(self):
-        save_button = tk.Button(master=self, text="Send", width=20, command=self.send_click())
+        save_button = tk.Button(master=self, text="Send", width=20, command=self.send_click)
         # You must implement this.
         # Here you must configure the button to bind its click to
         # the send_click() function.
@@ -112,16 +113,25 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.user = user
         self.pwd = pwd
         super().__init__(root, title)
+    
+    def add_server(self):
+        user_input = tk.simpledialog.askstring("DS Server Address", "Enter the name of a server: ")
+        self.server = user_input
 
     def body(self, frame):
+
         self.server_label = tk.Label(frame, width=30, text="DS Server Address")
         self.server_label.pack()
+        
         self.server_entry = tk.Entry(frame, width=30)
+        print(f"END: {tk.END}")
+        print(f"Server: {self.server}")
         self.server_entry.insert(tk.END, self.server)
         self.server_entry.pack()
 
         self.username_label = tk.Label(frame, width=30, text="Username")
         self.username_label.pack()
+
         self.username_entry = tk.Entry(frame, width=30)
         self.username_entry.insert(tk.END, self.user)
         self.username_entry.pack()
@@ -132,9 +142,11 @@ class NewContactDialog(tk.simpledialog.Dialog):
         # such that when the user types, the only thing that appears are
         # * symbols.
         #self.password...
-        self.password_entry = tk.Label(frame, width=30, text="Password")
-        self.password_entry.pack()
+        self.password_label = tk.Label(frame, width=30, text="Password")
+        self.password_label.pack()
+
         self.password_entry = tk.Entry(frame, width=30)
+        self.password_entry['show'] = '*'
         self.password_entry.insert(tk.END, self.pwd)
         self.password_entry.pack()
 
@@ -156,17 +168,23 @@ class MainApp(tk.Frame):
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
         #self.direct_messenger = ... continue!
-        self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+        self.direct_messenger = None
+        # self.direct_messenger = DirectMessenger(dsuserver="168.235.86.101", username="melonmusk", password="XA123") #DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
 
         # After all initialization is complete,
         # call the _draw method to pack the widgets
         # into the root frame
         self._draw()
         self.body.insert_contact("studentexw23") # adding one example student.
+        self.body.insert_contact("melonmusk2") # adding two example student.
 
     def send_message(self):
-        # You must implement this!
-        dsp.dm(self.direct_messenger, message="16", recipient=self.recipient) # TODO: fix this to actual message
+        message = self.body.get_text_entry()
+        if self.server is None:
+            print("WARNING: You must configure the server first.")
+            return
+        else:
+            dsp.dm(self.direct_messenger, message=message, recipient=self.recipient) # Message and Recipient working
 
     def add_contact(self):
         # You must implement this!
@@ -180,24 +198,38 @@ class MainApp(tk.Frame):
         self.recipient = recipient
 
     def configure_server(self):
-        ud = NewContactDialog(self.root, "Configure Account",
-                              self.username, self.password, self.server)
+        ud = NewContactDialog(root=self.root)
+
+        ud.__init__(root=self.root, title="Configure Account",
+                              user=self.username, pwd=self.password, server=self.server)
+
+        # AT This point self.server is empty
+
         self.username = ud.user
         self.password = ud.pwd
         self.server = ud.server
         # You must implement this!
         # You must configure and instantiate your
         # DirectMessenger instance after this line.
-        self.direct_messenger = dsp.join(self.direct_messenger) #DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+        if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
+            self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
         
 
     def publish(self, message:str):
         # You must implement this!
-        dsp.post(self.direct_messenger, message=message)
+        pass
+        # dsp.post(self.direct_messenger, message=message)
 
     def check_new(self):
         # You must implement this!
-        dsp.request_messages(self.direct_messenger, self.recipient)
+        if self.direct_messenger is not None:
+            self.direct_messenger.retrieve_new()
+        self.root.after(2000, self.check_new)
+        # dsp.request_messages(self.direct_messenger, self.recipient)
+
+    def open_file(self):
+        # You must implement this!
+        pass
 
     def _draw(self):
         # Build a menu and add it to the root frame.
@@ -206,7 +238,7 @@ class MainApp(tk.Frame):
         menu_file = tk.Menu(menu_bar)
 
         menu_bar.add_cascade(menu=menu_file, label='File')
-        menu_file.add_command(label='New')
+        menu_file.add_command(label='New', command=fh.create_profile)
         menu_file.add_command(label='Open...')
         menu_file.add_command(label='Close')
 
@@ -257,7 +289,7 @@ if __name__ == "__main__":
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
     id = main.after(2000, app.check_new)
-    print(id)
+    print(f"ID: {id}")
     # And finally, start up the event loop for the program (you can find
     # more on this in lectures of week 9 and 10).
     main.mainloop()
