@@ -80,32 +80,30 @@ class Post(dict):
     """ 
     entry = property(get_entry, set_entry)
     timestamp = property(get_time, set_time)
-    
-    
+
 class Profile:
-    """
-    The Profile class exposes the properties required to join an ICS 32 DSU server. You 
-    will need to use this class to manage the information provided by each new user 
-    created within your program for a2. Pay close attention to the properties and 
-    functions in this class as you will need to make use of each of them in your program.
-
-    When creating your program you will need to collect user input for the properties 
-    exposed by this class. A Profile class should ensure that a username and password 
-    are set, but contains no conventions to do so. You should make sure that your code 
-    verifies that required properties are set.
-
-    """
-
     def __init__(self, dsuserver=None, username=None, password=None):
-        self.dsuserver = dsuserver # REQUIRED
-        self.username = username # REQUIRED
-        self.password = password # REQUIRED
-        self.bio = ''            # OPTIONAL
-        self._posts = []         # OPTIONAL
+        self.dsuserver = dsuserver
+        self.username = username
+        self.password = password
+        self.bio = ""
+        self._posts = []
 
         self.friends = []
         self.new_messages = []
         self.all_messages = []
+
+    def set_dsu(self, server: str) -> None:
+        self.dsuserver = server
+
+    def set_user(self, user: str) -> None:
+        self.username = user
+
+    def set_pass(self, password: str) -> None:
+        self.password = password
+
+    def add_friend(self, friend: str) -> None:
+        self.friends.append(friend)
     
     """
 
@@ -212,6 +210,7 @@ class Profile:
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
                 self.bio = obj['bio']
+                self.friends = obj["friends"]
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)

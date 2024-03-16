@@ -4,6 +4,9 @@ from typing import Text
 from ds_messenger import DirectMessenger
 import ds_protocol as dsp
 import file_handler as fh
+import json
+from Profile import Profile
+import time
 
 
 class Body(tk.Frame):
@@ -169,16 +172,21 @@ class MainApp(tk.Frame):
         # instantiate your DirectMessenger instance after this line.
         #self.direct_messenger = ... continue!
         self.direct_messenger = None
+        self.profile = None
         # self.direct_messenger = DirectMessenger(dsuserver="168.235.86.101", username="melonmusk", password="XA123") #DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
 
         # After all initialization is complete,
         # call the _draw method to pack the widgets
         # into the root frame
         self._draw()
-        self.body.insert_contact("studentexw23") # adding one example student.
-        self.body.insert_contact("melonmusk2") # adding two example student.
+        #self.body.insert_contact("studentexw23") # adding one example student.
+        #self.body.insert_contact("melonmusk2") # adding two example student.
+        # self.body.insert_contact_message("Welcome!") # example message
 
     def send_message(self):
+        """
+        Send a message to user if a profile is loaded
+        """
         message = self.body.get_text_entry()
         if self.server is None:
             print("WARNING: You must configure the server first.")
@@ -187,23 +195,29 @@ class MainApp(tk.Frame):
             dsp.dm(self.direct_messenger, message=message, recipient=self.recipient) # Message and Recipient working
 
     def add_contact(self):
+        """
+        Adds a contact.
+        """
         # You must implement this!
         # Hint: check how to use tk.simpledialog.askstring to retrieve
         # the name of the new contact, and then use one of the body
         # methods to add the contact to your contact list
-        user_input = tk.simpledialog.askstring("Input", "Enter the name of a profile: ")
-        self.body.insert_contact(user_input)
+        if self.profile is None:
+            print("WARNING: Configure server first!")
+        else:
+            contact = tk.simpledialog.askstring("Input", "Enter the name of a profile: ")
+            self.body.insert_contact(contact)
+            if contact not in self.profile.friends:
+                self.profile.add_friend(contact)
 
     def recipient_selected(self, recipient):
         self.recipient = recipient
 
     def configure_server(self):
+        """
+        Prompts the user to enter details to configure server.
+        """
         ud = NewContactDialog(self.root)
-        # ud.__init__(root=self.root, title="Configure Account",
-        #                       user=self.username, pwd=self.password, server=self.server)
-
-        # AT This point self.server is empty
-
         self.username = ud.user
         self.password = ud.pwd
         self.server = ud.server
@@ -212,6 +226,7 @@ class MainApp(tk.Frame):
         # DirectMessenger instance after this line.
         if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
             self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+            self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
         
 
     def publish(self, message:str):
@@ -220,26 +235,61 @@ class MainApp(tk.Frame):
         # dsp.post(self.direct_messenger, message=message)
 
     def check_new(self):
-        # You must implement this!
+        """
+        Checks for new messages every 2 seconds.
+        """
         if self.direct_messenger is not None:
-            self.direct_messenger.retrieve_new()
+            message = self.direct_messenger.retrieve_new()
+            print(f"msg: {message}, len: {len(message)}")
+            if len(message) >= 1:
+                self.body.insert_contact_message(message[0])
+                if self.profile is not None:
+                    self.profile.set_new_messages()
         self.root.after(2000, self.check_new)
         # dsp.request_messages(self.direct_messenger, self.recipient)
 
     def open_file(self):
-        # You must implement this!
-        pass
+        """
+        Opens a file and reads the contents of the file. Loads an exisitng profile on local device to server.
+        """
+        print("open file1")
+        file_path = tk.filedialog.askopenfilename() # special method for getting path name
+        file_read = open(file_path, mode="r", encoding="utf-8")
+        text_data = file_read.read()
+        file_read.close()
+
+        text_data = json.loads(text_data)
+
+        self.server = text_data["dsuserver"]
+        self.username = text_data["username"]
+        self.password = text_data["password"]
+        # self.friends = text_data["friends"]
+        if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
+            self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+            self.profile = Profile()
+            self.profile.load_profile(str(file_path))
+
+    def close_window(self):
+        """
+        Closes GUI and saves user information onto local machine
+        """
+        self.profile.set_all_messages()
+        time.sleep(1) # buffer to load
+        fh.store_profile(self.profile)
+        self.root.destroy()
 
     def _draw(self):
-        # Build a menu and add it to the root frame.
+        """
+        Builds a menu and adds it to the frame
+        """
         menu_bar = tk.Menu(self.root)
         self.root['menu'] = menu_bar
         menu_file = tk.Menu(menu_bar)
 
         menu_bar.add_cascade(menu=menu_file, label='File')
-        menu_file.add_command(label='New', command=fh.create_profile)
-        menu_file.add_command(label='Open...')
-        menu_file.add_command(label='Close')
+        menu_file.add_command(label='New')
+        menu_file.add_command(label='Open...', command=self.open_file)
+        menu_file.add_command(label='Close', command=self.close_window)
 
         settings_file = tk.Menu(menu_bar)
         menu_bar.add_cascade(menu=settings_file, label='Settings')

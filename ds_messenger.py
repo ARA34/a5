@@ -167,7 +167,7 @@ class DirectMessenger:
                 else:
                     satisfy = ERROR
             else:
-                print(json_msg)
+                print(json_msg) # printing the json message
                 json_msg = json.dumps(json_msg)
                 self.write_command(json_msg)
                 response = self.read_command()

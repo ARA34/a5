@@ -2,6 +2,7 @@ from pathlib import Path
 from Profile import *
 import ds_protocol as dsp
 import time
+import ds_messenger as dsm
 
 current_folder = Path(".").resolve()
 
@@ -15,15 +16,15 @@ def create_profile_folder() -> str:
         new_path.mkdir(parents=True, exist_ok=True)
     return str(new_path)
 
-def create_profile():
-    """
-    Creates a new profile and returns the instance of the profile.
-    """
-    srv_ip = input("Enter the server IP: ")
-    username = input("Enter the username: ")
-    password = input("Enter the password: ")
-    new_profile = Profile(dsuserver=srv_ip, username=username, password=password)
-    store_profile(new_profile)
+# def create_profile():
+#     """
+#     Creates a new profile and returns the instance of the profile.
+#     """
+#     srv_ip = input("Enter the server IP: ")
+#     username = input("Enter the username: ")
+#     password = input("Enter the password: ")
+#     new_profile = Profile(dsuserver=srv_ip, username=username, password=password)
+#     store_profile(new_profile)
     
 
 def store_profile(profile: Profile):
