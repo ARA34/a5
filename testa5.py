@@ -38,16 +38,16 @@ def main():
     # DM: melonmusk --> melonmusk2
     # print(dsp.dm(server="168.235.86.101", port=PORT, username=melon_musk.username, password=melon_musk.password, message="hello there", extra="melonmusk2"))
 
-    melonmusk_dsm = dsm.DirectMessenger(server_ip, "melonmusk", "XA123")
+    melonmusk_dsm = dsm.DirectMessenger(server_ip, "melonmusk4", "XA123")
     melonmusk_dsm.join() # melonmusk needs to join server first
     message = "-_- again twice"
-    if melonmusk_dsm.send(message=message, recipient="melonmusk3") is True:
-        print(f"Sent message: {message}")
-    else:
-        print("failed to send message")
-    # while True:
-    #     time.sleep(2)
-    #     print(f"Recieved: {melonmusk_dsm.retrieve_new()}")
+    # if melonmusk_dsm.send(message=message, recipient="melonmusk3") is True:
+    #     print(f"Sent message: {message}")
+    # else:
+    #     print("failed to send message")
+    while True:
+        time.sleep(2)
+        print(f"Recieved: {melonmusk_dsm.retrieve_new()}")
 
     # print(f"sent message: {}") # sending dm 1
     # melonmusk_dsm.send(message = "5", recipient="melonmusk2") # sending dm 2

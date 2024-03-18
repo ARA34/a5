@@ -14,7 +14,7 @@ from collections import namedtuple
 import socket
 import Profile
 import time
-import ds_client as dsc # TODO: REPLACE
+# import ds_client as dsc # TODO: REPLACE
 import ds_messenger as dsm
 
 class DSPServerError(Exception):

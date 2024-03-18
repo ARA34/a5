@@ -1,4 +1,3 @@
-# must be a stand alone module --> cannot depend on others
 import socket
 import json
 import time
@@ -76,7 +75,6 @@ class DirectMessage:
         return json_msg
 
 
-
 class DirectMessenger:
 
     def __init__(self, dsuserver=None, username=None, password=None):
@@ -90,13 +88,22 @@ class DirectMessenger:
         self.bio = "" # optional
         self.data = None
         
-    def get_conn(self):
+    def get_conn(self) -> None:
+        """
+        Sets _conn connection attribute
+        """
         return self._conn
     
     def set_bio(self, bio: str) -> None:
+        """
+        sets bio attribute
+        """
         self.bio = bio
 
     def get_details(self):
+        """
+        For debugging, prints all class information
+        """
         print(self.dsuserver)
         print(self.username)
         print(self.password)
@@ -118,19 +125,25 @@ class DirectMessenger:
             self.set_token() # token is set
             sending_two = False
             
-
-            if (self.username and self.password != "") and (message == "") and self.bio == "" and recipient is None:
+            if ((self.username and self.password != "") 
+                and (message == "")
+                and self.bio == ""
+                and recipient is None):
                 # joining server
                 json_msg = {"join":
                             {"username": self.username,
                             "password": self.password,
                             "token": ""}}
-            elif message != "" and self.bio is None and recipient is None:
+            elif (message != ""
+                  and self.bio is None
+                  and recipient is None):
                 # posting message
                 json_msg = {"token": self.token,
                             "post": {"entry": message,
                                      "timestamp": str(time.time())}}
-            elif message == "" and self.bio != "" and recipient is None:
+            elif (message == ""
+                  and self.bio != ""
+                  and recipient is None):
                 # changing bio
                 json_msg = {"token": self.token,
                             "bio": {"entry": self.bio,
@@ -185,9 +198,8 @@ class DirectMessenger:
         return self.send(message="",recipient=None)
 
     def retrieve_new(self) -> list:
-        # must return a list of DirectMessage objects containing all new messages
         """
-        retrives the new messages from
+        Retrives list of new messages being sent to user
         """
         self.send(message="", recipient="new") # sets the data attribute to not None
         dict_messages = self.data
@@ -200,9 +212,13 @@ class DirectMessenger:
         retrives all messages every to be send to this user
         """
         self.send(message="", recipient="all")
-        dict_messages = self.data
-        output_messages = list(map(lambda d: d["message"], dict_messages))
-        return output_messages
+        try:
+            dict_messages = self.data
+            output_messages = list(map(lambda d: d["message"], dict_messages))
+            return output_messages
+        except Exception as ex:
+            print(f"Error, something wrong, {ex}")
+            return
 
     def init_conn(self, sock: socket) -> None:
         """

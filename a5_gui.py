@@ -119,15 +119,8 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.user = user
         self.pwd = pwd
         super().__init__(root, title)
-    
-    def add_server(self):
-        user_input = tk.simpledialog.askstring("DS Server Address", "Enter the name of a server: ")
-        self.server = user_input
 
     def body(self, frame):
-        # frame = tk.Tk()
-        # frame=self.root
-
         self.server_label = tk.Label(frame, width=30, text="DS Server Address")
         self.server_label.pack()
 
@@ -142,12 +135,6 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.username_entry.insert(tk.END, "")
         self.username_entry.pack()
 
-        # You need to implement also the region for the user to enter
-        # the Password. The code is similar to the Username you see above
-        # but you will want to add self.password_entry['show'] = '*'
-        # such that when the user types, the only thing that appears are
-        # * symbols.
-        #self.password...
         self.password_label = tk.Label(frame, width=30, text="Password")
         self.password_label.pack()
 
@@ -155,7 +142,6 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.password_entry['show'] = '*'
         self.password_entry.insert(tk.END, "")
         self.password_entry.pack()
-
 
     def apply(self):
         self.user = self.username_entry.get()
@@ -190,9 +176,11 @@ class MainApp(tk.Frame):
         """
         Send a message to user if a profile is loaded
         """
+        print("send pressed")
+        print(f"server after pressed: {self.server}")
         message = self.body.get_text_entry()
         if self.server is None:
-            print("WARNING: You must configure the server first.")
+            print("WARNING: You must create new or load a profile first.")
             return
         else:
             dsp.dm(self.direct_messenger, message=message, recipient=self.recipient) # Message and Recipient working
@@ -205,8 +193,9 @@ class MainApp(tk.Frame):
         # Hint: check how to use tk.simpledialog.askstring to retrieve
         # the name of the new contact, and then use one of the body
         # methods to add the contact to your contact list
-        if self.profile is None:
-            print("WARNING: Configure server first!")
+        if self.direct_messenger is None:
+            print("WARNING: You must create or load a profile first")
+            return
         else:
             contact = tk.simpledialog.askstring("Input", "Enter the name of a profile: ")
             self.body.insert_contact(contact)
@@ -218,27 +207,35 @@ class MainApp(tk.Frame):
 
     def configure_server(self):
         """
-        Prompts the user to enter details to configure server.
+        Prompts the user to enter details to configure(change) server, username, and password.
         """
-        ud = NewContactDialog(self.root)
-        self.username = ud.user
-        self.password = ud.pwd
-        self.server = ud.server
-        # You must implement this!
-        # You must configure and instantiate your
-        # DirectMessenger instance after this line.
-        if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
-            self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
-            self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
-            # check if user has already been created
-            if fh.user_exists(self.direct_messenger.username):
-                pass
-            else:
-                fh.create_profile(self.direct_messenger)
-            self.profile = Profile()
-            self.profile.load_profile(fh.get_profile_path(self.direct_messenger.username))
-            self.load_assets()
-        
+        if self.direct_messenger is None:
+            print("WARNING: You must create or load a profile first")
+            return
+        else:
+            ud = NewContactDialog(self.root)
+            if ud.server != "":
+                self.server = ud.server
+                self.profile.dsuserver = ud.server
+            if ud.user != "":
+                self.username = ud.user
+                self.profile.username = ud.user
+            if ud.pwd != "":
+                self.password = ud.pwd
+                self.profile.password = ud.pwd
+            self.profile.save_profile(fh.get_profile_path(self.direct_messenger.username))
+
+        # if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
+        #     self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+        #     self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
+        #     # check if user has already been created
+        #     if fh.user_exists(self.direct_messenger.username):
+        #         pass
+        #     else:
+        #         fh.create_profile(self.direct_messenger)
+        #     self.profile = Profile()
+        #     self.profile.load_profile(fh.get_profile_path(self.direct_messenger.username))
+        #     self.load_assets()
 
     def publish(self, message:str):
         # You must implement this!
@@ -250,24 +247,26 @@ class MainApp(tk.Frame):
         Checks for new messages every 2 seconds.
         """
         if self.direct_messenger is not None:
-            message = self.direct_messenger.retrieve_new()
-            print(f"msg: {message}, len: {len(message)}")
-            if len(message) >= 1:
-                self.body.insert_contact_message(message[0])
-            # else:
-            #     self.body.insert_contact_message("Waiting for messages...")
-            #     self.body.delete_contact_message("waiting for messages...")
-                if self.profile is not None:
-                    self.profile.set_new_messages()
-        self.root.after(2000, self.check_new)
-        # dsp.request_messages(self.direct_messenger, self.recipient)
+            if self.direct_messenger.join() is True:
+                message = self.direct_messenger.retrieve_new()
+                print(f"msg: {message}, len: {len(message)}")
+                if len(message) >= 1:
+                    self.body.insert_contact_message(message[0])
+                # else:
+                #     self.body.insert_contact_message("Waiting for messages...")
+                #     self.body.delete_contact_message("waiting for messages...")
+                    if self.profile is not None:
+                        self.profile.set_new_messages()
+                self.root.after(2000, self.check_new)
+            else:
+                self.body.insert_contact_message("WARNING: You must create or load a profile first")
 
-    def open_file(self):
+    def open_file(self) -> None:
         """
         Opens a file and reads the contents of the file. Loads an exisitng profile on local device to server.
         """
         print("opening file")
-        file_path = tk.filedialog.askopenfilename() # special method for getting path name
+        file_path = tk.filedialog.askopenfilename()
         file_read = open(file_path, mode="r", encoding="utf-8")
         text_data = file_read.read()
         file_read.close()
@@ -277,26 +276,47 @@ class MainApp(tk.Frame):
         self.server = text_data["dsuserver"]
         self.username = text_data["username"]
         self.password = text_data["password"]
-        # self.friends = text_data["friends"]
         if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
             self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
             self.profile = Profile()
             self.profile.load_profile(str(file_path))
             self.load_assets()
 
-    def load_assets(self):
-        if self.profile is not None:
-            # load friends
-            for friend in self.profile.friends:
-                self.body.insert_contact(friend)
-            for message in self.profile.all_messages:
-                self.body.insert_contact_message(message)
+    def new_profile(self) -> None:
+        """
+        Creates new profile and connects to ICS32 distributed social website
+        """
+        ud1 = NewContactDialog(self.root, title="Creating ICS32 Distributed Account")
+        self.username = ud1.user
+        self.password = ud1.pwd
+        self.server = ud1.server
 
-    def close_window(self):
+        if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
+            self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
+            self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
+            # check if user has already been created
+            if fh.user_exists(self.direct_messenger.username):
+                pass
+            else:
+                fh.create_profile(self.direct_messenger)
+            self.profile = Profile()
+            self.profile.load_profile(fh.get_profile_path(self.direct_messenger.username))
+            self.load_assets()
+
+    def load_assets(self) -> None:
+        if self.profile is not None and self.direct_messenger is not None:
+            if self.direct_messenger.join() is True:
+                for friend in self.profile.friends:
+                    self.body.insert_contact(friend)
+                for message in self.profile.all_messages:
+                    self.body.insert_contact_message(message)
+
+    def close_window(self) -> None:
         """
         Closes GUI and saves user information onto local machine
         """
-        self.profile.set_all_messages()
+        print(f"profile: {self.profile}")
+        self.profile.set_all_messages() # error because dsu sever invalid -> pass the error
         time.sleep(1) # buffer to load
         fh.store_profile(self.profile)
         self.root.destroy()
@@ -310,7 +330,7 @@ class MainApp(tk.Frame):
         menu_file = tk.Menu(menu_bar)
 
         menu_bar.add_cascade(menu=menu_file, label='File')
-        menu_file.add_command(label='New')
+        menu_file.add_command(label='New', command=self.new_profile)
         menu_file.add_command(label='Open...', command=self.open_file)
         menu_file.add_command(label='Close', command=self.close_window)
 
@@ -329,8 +349,7 @@ class MainApp(tk.Frame):
         self.footer = Footer(self.root, send_callback=self.send_message)
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
 
-
-
+# def main_func():
 if __name__ == "__main__":
     # All Tkinter programs start with a root window. We will name ours 'main'.
     main = tk.Tk()

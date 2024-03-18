@@ -37,7 +37,7 @@ def get_profile_path(username: str) -> str:
     if user_exists(username):
         return str(current_folder / "dsu_profiles" / (username + ".dsu"))
     else:
-        print("ERROR: User does not exists, configure server first") 
+        print("ERROR: User does not exists, create new or load first") 
 
 def store_profile(profile: Profile):
     """
