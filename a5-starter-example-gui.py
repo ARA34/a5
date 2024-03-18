@@ -42,6 +42,9 @@ class Body(tk.Frame):
     def insert_contact_message(self, message:str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
 
+    def delete_contact_message(self, message: str):
+        self.entry_editor.delete("1.0", len(message))
+
     def get_text_entry(self) -> str:
         return self.message_editor.get('1.0', 'end').rstrip()
 
@@ -227,6 +230,14 @@ class MainApp(tk.Frame):
         if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
             self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
             self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
+            # check if user has already been created
+            if fh.user_exists(self.direct_messenger.username):
+                pass
+            else:
+                fh.create_profile(self.direct_messenger)
+            self.profile = Profile()
+            self.profile.load_profile(fh.get_profile_path(self.direct_messenger.username))
+            self.load_assets()
         
 
     def publish(self, message:str):
@@ -243,6 +254,9 @@ class MainApp(tk.Frame):
             print(f"msg: {message}, len: {len(message)}")
             if len(message) >= 1:
                 self.body.insert_contact_message(message[0])
+            # else:
+            #     self.body.insert_contact_message("Waiting for messages...")
+            #     self.body.delete_contact_message("waiting for messages...")
                 if self.profile is not None:
                     self.profile.set_new_messages()
         self.root.after(2000, self.check_new)
@@ -252,7 +266,7 @@ class MainApp(tk.Frame):
         """
         Opens a file and reads the contents of the file. Loads an exisitng profile on local device to server.
         """
-        print("open file1")
+        print("opening file")
         file_path = tk.filedialog.askopenfilename() # special method for getting path name
         file_read = open(file_path, mode="r", encoding="utf-8")
         text_data = file_read.read()
@@ -268,6 +282,15 @@ class MainApp(tk.Frame):
             self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
             self.profile = Profile()
             self.profile.load_profile(str(file_path))
+            self.load_assets()
+
+    def load_assets(self):
+        if self.profile is not None:
+            # load friends
+            for friend in self.profile.friends:
+                self.body.insert_contact(friend)
+            for message in self.profile.all_messages:
+                self.body.insert_contact_message(message)
 
     def close_window(self):
         """
@@ -305,6 +328,7 @@ class MainApp(tk.Frame):
         self.body.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
         self.footer = Footer(self.root, send_callback=self.send_message)
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
+
 
 
 if __name__ == "__main__":

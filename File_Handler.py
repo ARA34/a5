@@ -16,16 +16,28 @@ def create_profile_folder() -> str:
         new_path.mkdir(parents=True, exist_ok=True)
     return str(new_path)
 
-# def create_profile():
-#     """
-#     Creates a new profile and returns the instance of the profile.
-#     """
-#     srv_ip = input("Enter the server IP: ")
-#     username = input("Enter the username: ")
-#     password = input("Enter the password: ")
-#     new_profile = Profile(dsuserver=srv_ip, username=username, password=password)
-#     store_profile(new_profile)
-    
+def create_profile(profile: Profile):
+    """
+    Creates a new profile and returns the instance of the profile.
+    """
+    new_profile = Profile(dsuserver=profile.dsuserver, username=profile.username, password=profile.password)
+    store_profile(new_profile)
+
+
+def user_exists(username: str):
+    """
+    checks if a user profile exists
+    """
+    return (current_folder / "dsu_profiles" / (username + ".dsu")).exists()
+
+def get_profile_path(username: str) -> str:
+    """
+    returns the path to profile in a string
+    """
+    if user_exists(username):
+        return str(current_folder / "dsu_profiles" / (username + ".dsu"))
+    else:
+        print("ERROR: User does not exists, configure server first") 
 
 def store_profile(profile: Profile):
     """

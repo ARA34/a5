@@ -211,6 +211,10 @@ class Profile:
                 self.dsuserver = obj['dsuserver']
                 self.bio = obj['bio']
                 self.friends = obj["friends"]
+                self.new_messages = ["new_messages"]
+                self.all_messages = obj["all_messages"]
+
+
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
