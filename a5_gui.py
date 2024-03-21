@@ -30,7 +30,7 @@ class Body(tk.Frame):
         entry = self._contacts[index]
         if self._select_callback is not None:
             self._select_callback(entry)
-            self.message_editor.delete(1.0, tk.END)
+            self.message_editor.delete("1.0", tk.END)
 
     def insert_contact(self, contact: str):
         self._contacts.append(contact)
@@ -59,8 +59,7 @@ class Body(tk.Frame):
         self.message_editor.insert(1.0, text)
     
     def delete_everything(self):
-        print("delete...")
-        self.message_editor.delete(1.0, tk.END)
+        self.message_editor.delete("1.0", tk.END)
 
     def _draw(self):
         posts_frame = tk.Frame(master=self, width=250)
@@ -203,7 +202,7 @@ class MainApp(tk.Frame):
         displays particular messages for a selected friend user
         """
         self.recipient = recipient
-        self.body.delete_everything()
+        self.body.entry_editor.delete("1.0", tk.END)
         recp = self.recipient
         valid_names = list(filter(lambda d: d[0] == recp, self.profile.all_messages))
         valid_msgs = list(map(lambda d: d[1], valid_names))
@@ -239,7 +238,6 @@ class MainApp(tk.Frame):
         Checks for new messages every 2 seconds.
         """
         dsm_var = self.direct_messenger
-
         if self.loaded is True:
             continue_check = dsm_var.join()
             if continue_check:
@@ -339,21 +337,23 @@ class MainApp(tk.Frame):
 
 def main_function():
     main = tk.Tk()
+
     login_win = NewContactDialog(main, title="login window")
     log_server = login_win.server
     log_user = login_win.user
     log_pass = login_win.pwd
+
+    app = MainApp(main)
     main.title("ICS 32 Distributed Social Messenger")
     main.geometry("720x480")
     main.option_add('*tearOff', False)
 
-    app = MainApp(main)
     app.direct_messenger = DirectMessenger(dsuserver=log_server, username=log_user, password=log_pass)
     app.profile = Profile()
     app.profile.load_profile(fh.get_profile_path(app.direct_messenger.username))
     app.load_assets()
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
-    id = main.after(2000, app.check_new)
-    print(f"ID: {id}")
+    # id = main.after(2000, app.check_new)
+    # print(f"ID: {id}")
     main.mainloop()
