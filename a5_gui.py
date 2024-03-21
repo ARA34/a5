@@ -205,10 +205,18 @@ class MainApp(tk.Frame):
         self.recipient = recipient
         self.body.entry_editor.delete("1.0", tk.END)
         recp = self.recipient
-        valid_names = list(filter(lambda d: d[0] == recp, self.profile.all_messages))
+        # new_msgs = self.profile.new_messages
+        new_msgs = [self.profile.new_messages[0].get_recipient(), self.profile.new_messages[0].get_message()]
+        print(f"nm: {new_msgs}") # debug
+        print(f"am: {self.profile.all_messages}")
+        am = self.profile.all_messages
+        am.append(new_msgs)
+        print(f"am2: {am}") # debug
+        valid_names = list(filter(lambda d: d[0] == recp, am))
         valid_msgs = list(map(lambda d: d[1], valid_names))
         for msg in valid_msgs:
             self.body.insert_contact_message(f"{recp}: {msg}")
+        self.profile.all_messages.pop()
 
     def configure_server(self):
         """
@@ -242,14 +250,15 @@ class MainApp(tk.Frame):
         if self.loaded is True:
             continue_check = dsm_var.join()
             if continue_check:
-                message_tup_lst = dsm_var.retrieve_new() # list of DirectMessages with ideally only one
-                print(f"General Message: {message_tup_lst}")
-                if len(message_tup_lst) >= 1: # tup is DirectMessage
-                    for tup in message_tup_lst:
-                        print(f"msg: {tup.get_message}, sender: {tup.get_recipient}")
-                        self.body.insert_contact_message(tup.get_recipient + ": " + tup.get_message)
+                dm_list = dsm_var.retrieve_new() # list of DirectMessages with ideally only one
+                print(f"General Message: {dm_list}")
+                if len(dm_list) >= 1: # tup is DirectMessage
+                    for dm in dm_list:
+                        print(f"msg: {dm.get_message()}, sender: {dm.get_recipient()}")
+                        self.body.insert_contact_message(dm.get_recipient() + ": " + dm.get_message())
                     if self.profile is not None:
-                        self.profile.set_new_messages()
+                        self.profile.set_new_messages_offline(dm_list)
+                        # self.profile.set_new_messages()
             else:
                 print("Could not connect to sever - check_new")
                 self.body.insert_contact_message("WARNING: You must create or load a profile first")

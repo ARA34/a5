@@ -151,6 +151,10 @@ class Profile:
         """
         dsm = DirectMessenger(dsuserver=self.dsuserver,username=self.username,password=self.password)
         self.new_messages = dsm.retrieve_new()
+    
+    def set_new_messages_offline(self, messages:list):
+        print("extended new_msgs")
+        self.new_messages.extend(messages)
         
 
     def set_all_messages(self):
@@ -205,7 +209,7 @@ class Profile:
                 self.dsuserver = obj['dsuserver']
                 self.bio = obj['bio']
                 self.friends = obj["friends"]
-                self.new_messages = ["new_messages"]
+                self.new_messages = obj["new_messages"]
                 self.all_messages = obj["all_messages"]
 
 
