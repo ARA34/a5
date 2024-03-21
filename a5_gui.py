@@ -8,6 +8,7 @@ import json
 from Profile import Profile
 import time
 from pathlib import Path
+import ttkthemes
 
 
 class Body(tk.Frame):
@@ -163,7 +164,8 @@ class NewContactDialog(tk.simpledialog.Dialog):
 class MainApp(tk.Frame):
     def __init__(self, root):
         tk.Frame.__init__(self, root)
-        self.root = root
+        self.root = ttkthemes.ThemedTk()
+        self.root.set_theme("black")
         self.username = None
         self.password = None
         self.server = None
