@@ -49,6 +49,20 @@ def store_profile(profile: Profile):
     new_path.touch()
     profile.save_profile(path=new_path)
 
+def get_messages_in_file(username: str):
+    folder_path = Path(".").resolve()
+    dsu_folder = folder_path / "dsu_profiles"
+    if dsu_folder.exists():
+        user_path = folder_path / "dsu_profiles" / (username + ".dsu")
+        file_read = open(user_path, mode="r", encoding="utf-8")
+        text_data = file_read.read()
+        file_read.close()
+
+        text_data = json.loads(text_data)
+        return text_data
+    else:
+        print("There is no dsu profile folder")
+
 # structure for saving messages
 # p1 = Profile(dsuserver="168.235.86.101", username="melonmusk2", password="XA123")
 # melonmusk_dsm = DirectMessenger("168.235.86.101", "melonmusk", "XA123")

@@ -22,17 +22,19 @@ def extract_json(json_msg: str) -> msg_info:
         json_obj = json.loads(json_msg)
         vals = list(json_obj["response"].values())
         keys = list(json_obj["response"].keys())
-        if "message" in keys:
+
+        if "message" in keys: # direct message sent
             m = "message"
-        elif "messages" in keys:
+        elif "messages" in keys: # used for retrieving message(s)
             m = "messages"
-        type = json_obj["response"]["type"]
-        message = json_obj["response"][m]
-        msg_info_1 = msg_info(type, message, "")
+        type = json_obj["response"]["type"] # getting the type
+
+        message_list = json_obj["response"][m] # getting the list of dictionaries containing the messages and from
+        msg_info_1 = msg_info(type, message_list, "")
         if len(vals) == 3:
             # token exists
             token = json_obj["response"]["token"]
-            msg_info_1 = msg_info(type, message, token)
+            msg_info_1 = msg_info(type, message_list, token)
     except json.JSONDecodeError:
       print("Json cannot be decoded.")
     return msg_info_1
@@ -203,19 +205,24 @@ class DirectMessenger:
         """
         self.send(message="", recipient="new") # sets the data attribute to not None
         dict_messages = self.data
+
         output_messages = list(map(lambda d: d["message"], dict_messages))
-        return output_messages
+        users = list(map(lambda d: d["from"], dict_messages))
+        output_list = list(map(lambda x,y: (x,y), users, output_messages))# list of tuples(user, messsage)
+        return output_list
 
     def retrieve_all(self) -> list:
         # must return a list of DirectMessage objects containing all messages
         """
-        retrives all messages every to be send to this user
+        retrives all messages ever to be sent to this user as well as senders
         """
-        self.send(message="", recipient="all")
+        self.send(message="", recipient="all") # gets data from server
         try:
             dict_messages = self.data
-            output_messages = list(map(lambda d: d["message"], dict_messages))
-            return output_messages
+            output_messages = list(map(lambda d: d["message"], dict_messages)) # list of messages
+            users = list(map(lambda d: d["from"], dict_messages)) # list of senders
+            output_list = list(map(lambda x,y: (x,y), users, output_messages))
+            return output_list
         except Exception as ex:
             print(f"Error, something wrong, {ex}")
             return
