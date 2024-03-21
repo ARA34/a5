@@ -17,22 +17,15 @@ class Body(tk.Frame):
         self.root = root
         self._contacts = [str]
         self._select_callback = recipient_selected_callback
-        # After all initialization is complete,
-        # call the _draw method to pack the widgets
-        # into the Body instance
         self._draw()
         self.all_messages = None
 
     def node_select(self, event):
         index = int(self.posts_tree.selection()[0])
         entry = self._contacts[index]
-        print(entry) # selected user
         if self._select_callback is not None:
             self._select_callback(entry)
             self.message_editor.delete(1.0, tk.END)
-            # delete
-            # self.message_editor.delete(1.0, tk.END)
-            # TODO: insert messages here
 
     def insert_contact(self, contact: str):
         self._contacts.append(contact)
@@ -115,9 +108,6 @@ class Footer(tk.Frame):
 
     def _draw(self):
         save_button = tk.Button(master=self, text="Send", width=20, command=self.send_click)
-        # You must implement this.
-        # Here you must configure the button to bind its click to
-        # the send_click() function.
         save_button.pack(fill=tk.BOTH, side=tk.RIGHT, padx=5, pady=5)
 
         self.footer_label = tk.Label(master=self, text="Ready.")
@@ -125,6 +115,7 @@ class Footer(tk.Frame):
 
 
 class NewContactDialog(tk.simpledialog.Dialog):
+
     def __init__(self, root, title=None, user=None, pwd=None, server=None):
         self.root = root
         self.server = server
@@ -162,6 +153,7 @@ class NewContactDialog(tk.simpledialog.Dialog):
 
 
 class MainApp(tk.Frame):
+
     def __init__(self, root):
         tk.Frame.__init__(self, root)
         self.root = ttkthemes.ThemedTk()
@@ -170,21 +162,10 @@ class MainApp(tk.Frame):
         self.password = None
         self.server = None
         self.recipient = None
-        # You must implement this! You must configure and
-        # instantiate your DirectMessenger instance after this line.
-        #self.direct_messenger = ... continue!
         self.direct_messenger = None
         self.profile = None
         self.loaded = False
-        # self.direct_messenger = DirectMessenger(dsuserver="168.235.86.101", username="melonmusk", password="XA123") #DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
-
-        # After all initialization is complete,
-        # call the _draw method to pack the widgets
-        # into the root frame
         self._draw()
-        #self.body.insert_contact("studentexw23") # adding one example student.
-        #self.body.insert_contact("melonmusk2") # adding two example student.
-        # self.body.insert_contact_message("Welcome!") # example message
 
     def send_message(self):
         """
@@ -197,16 +178,12 @@ class MainApp(tk.Frame):
             print("WARNING: You must create new or load a profile first.")
             return
         else:
-            dsp.dm(self.direct_messenger, message=message, recipient=self.recipient) # Message and Recipient working
+            dsp.dm(self.direct_messenger, message=message, recipient=self.recipient)
 
     def add_contact(self):
         """
         Adds a contact.
         """
-        # You must implement this!
-        # Hint: check how to use tk.simpledialog.askstring to retrieve
-        # the name of the new contact, and then use one of the body
-        # methods to add the contact to your contact list
         if self.direct_messenger is None:
             print("WARNING: You must create or load a profile first")
             return
@@ -250,9 +227,7 @@ class MainApp(tk.Frame):
             self.profile.save_profile(fh.get_profile_path(self.direct_messenger.username))
 
     def publish(self, message:str):
-        # You must implement this!
         pass
-        # dsp.post(self.direct_messenger, message=message)
 
     def check_new(self):
         """
@@ -263,7 +238,7 @@ class MainApp(tk.Frame):
         if self.loaded is True:
             continue_check = dsm_var.join()
             if continue_check:
-                message_tup_lst = dsm_var.retrieve_new() # is getting [(user, message)]
+                message_tup_lst = dsm_var.retrieve_new()
                 print(f"General Message: {message_tup_lst}")
                 if len(message_tup_lst) >= 1:
                     for tup in message_tup_lst:
@@ -277,25 +252,6 @@ class MainApp(tk.Frame):
         else:
             pass
         self.root.after(2000, self.check_new)
-
-
-        # tmp_var = self.direct_messenger
-        # if tmp_var is not None:
-        #     continue_check = tmp_var.join()
-        #     # time.sleep(1) # debug
-        #     if continue_check is True:
-        #         message = tmp_var.retrieve_new()
-        #         print(f"msg: {message}, len: {len(message)}") # debug
-        #         if len(message) >= 1:
-        #             self.body.insert_contact_message(message[0])
-        #         # else:
-        #         #     self.body.insert_contact_message("Waiting for messages...")
-        #         #     self.body.delete_contact_message("waiting for messages...")
-        #             if self.profile is not None:
-        #                 self.profile.set_new_messages()
-        #         self.root.after(2000, self.check_new)
-        #     else:
-        #         self.body.insert_contact_message("WARNING: You must create or load a profile first")
 
     def open_file(self) -> None:
         """
@@ -338,24 +294,14 @@ class MainApp(tk.Frame):
             if self.direct_messenger.join() is True:
                 for friend in self.profile.friends:
                     self.body.insert_contact(friend)
-                # recp = self.recipient
-
-                # valid_msgs = list(filter(lambda d: d[0] == recp, self.profile.all_messages))
-
-                # for msg in valid_msgs:
-                #     print(f"{recp}: {msg}")
-                #     self.body.insert_contact_message(recp + ": " + msg)
         self.loaded = True
-
-                # for message in self.profile.all_messages:
-                #     self.body.insert_contact_message(message)
 
     def close_window(self) -> None:
         """
         Closes GUI and saves user information onto local machine
         """
-        self.profile.set_all_messages() # error because dsu sever invalid -> pass the error
-        time.sleep(1) # buffer to load
+        self.profile.set_all_messages()
+        time.sleep(1)
         fh.store_profile(self.profile)
         self.root.destroy()
 
@@ -379,60 +325,30 @@ class MainApp(tk.Frame):
         settings_file.add_command(label='Configure DS Server',
                                   command=self.configure_server)
 
-        # The Body and Footer classes must be initialized and
-        # packed into the root window.
         self.body = Body(self.root,
                          recipient_selected_callback=self.recipient_selected)
         self.body.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
         self.footer = Footer(self.root, send_callback=self.send_message)
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
 
-# def main_func():
-if __name__ == "__main__":
-    # All Tkinter programs start with a root window. We will name ours 'main'.
-    # login = tk.Tk()
-    # login_win = NewContactDialog(login, title="login window")
 
+def main_function():
     main = tk.Tk()
     login_win = NewContactDialog(main, title="login window")
-    # these are all set
     log_server = login_win.server
     log_user = login_win.user
     log_pass = login_win.pwd
-
-    # 'title' assigns a text value to the Title Bar area of a window.
     main.title("ICS 32 Distributed Social Messenger")
-
-    # This is just an arbitrary starting point. You can change the value
-    # around to see how the starting size of the window changes.
     main.geometry("720x480")
-
-    # adding this option removes some legacy behavior with menus that
-    # some modern OSes don't support. If you're curious, feel free to comment
-    # out and see how the menu changes.
     main.option_add('*tearOff', False)
-
-    # Initialize the MainApp class, which is the starting point for the
-    # widgets used in the program. All of the classes that we use,
-    # subclass Tk.Frame, since our root frame is main, we initialize
-    # the class with it.
 
     app = MainApp(main)
     app.direct_messenger = DirectMessenger(dsuserver=log_server, username=log_user, password=log_pass)
     app.profile = Profile()
     app.profile.load_profile(fh.get_profile_path(app.direct_messenger.username))
     app.load_assets()
-
-    # When update is called, we finalize the states of all widgets that
-    # have been configured within the root frame. Here, update ensures that
-    # we get an accurate width and height reading based on the types of widgets
-    # we have used. minsize prevents the root window from resizing too small.
-    # Feel free to comment it out and see how the resizing
-    # behavior of the window changes.
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
     id = main.after(2000, app.check_new)
     print(f"ID: {id}")
-    # And finally, start up the event loop for the program (you can find
-    # more on this in lectures of week 9 and 10).
     main.mainloop()

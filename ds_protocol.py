@@ -81,10 +81,10 @@ def bio(dsm_object: dsm.DirectMessenger, bio: str):
     if bio != "" and len(bio) > 1:
         print(f"Your bio was changed to [{bio}]")
         dsm_object.set_bio(bio)
-        dsm_object.send(message="", recipient=None) # but self.bio != "" --> might be problem
+        dsm_object.send(message="", recipient=None)
     else:
         print("You cannot have an empty or only whitespace bio or single character. Please try again.")
-        dsm_object.send(message="", recipient=None) # either way still runs
+        dsm_object.send(message="", recipient=None)
 
 def dm(dsm_object: dsm.DirectMessenger, message: str, recipient: str):
     message = message.strip()

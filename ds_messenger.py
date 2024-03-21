@@ -23,13 +23,13 @@ def extract_json(json_msg: str) -> msg_info:
         vals = list(json_obj["response"].values())
         keys = list(json_obj["response"].keys())
 
-        if "message" in keys: # direct message sent
+        if "message" in keys:
             m = "message"
-        elif "messages" in keys: # used for retrieving message(s)
+        elif "messages" in keys:
             m = "messages"
-        type = json_obj["response"]["type"] # getting the type
+        type = json_obj["response"]["type"]
 
-        message_list = json_obj["response"][m] # getting the list of dictionaries containing the messages and from
+        message_list = json_obj["response"][m]
         msg_info_1 = msg_info(type, message_list, "")
         if len(vals) == 3:
             # token exists
@@ -64,10 +64,8 @@ class DirectMessage:
         formats json_msg so that it can send a dm or request the latest dm or all the dms
         """
         if self.recipient == "new":
-            # requests messages sent in this session to user
             json_msg = {"token": token, "directmessage": "new"}
         elif self.recipient == "all":
-            # requests all messages ever sent to this user
             json_msg = {"token": token, "directmessage": "all"}
         else:
             json_msg = {"token":token,
@@ -81,13 +79,13 @@ class DirectMessenger:
 
     def __init__(self, dsuserver=None, username=None, password=None):
         self.token = None
-        
-        self.dsuserver = dsuserver # required
-        self._conn = None # connection namedtuple
-        
-        self.username = username # required
-        self.password = password # required
-        self.bio = "" # optional
+
+        self.dsuserver = dsuserver
+        self._conn = None
+
+        self.username = username
+        self.password = password
+        self.bio = ""
         self.data = None
         
     def get_conn(self) -> None:
@@ -281,4 +279,3 @@ class DirectMessenger:
         resp = self.read_command()
         parsed_resp = extract_json(resp)
         self.token = str(parsed_resp.token)
-
