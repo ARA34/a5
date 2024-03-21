@@ -11,6 +11,11 @@ from pathlib import Path
 import ttkthemes
 
 
+# Alex Reyes Aranda
+# areyesar@uci.edu
+# 69754988
+
+
 class Body(tk.Frame):
     def __init__(self, root, recipient_selected_callback=None):
         tk.Frame.__init__(self, root)

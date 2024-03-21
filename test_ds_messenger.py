@@ -4,6 +4,11 @@ import ds_protocol as dsp
 DSUSERVER = "168.235.86.101"
 
 
+# Alex Reyes Aranda
+# areyesar@uci.edu
+# 69754988
+
+
 melonmusk = DirectMessenger(dsuserver=DSUSERVER, username="melonmusk", password="XA123")
 
 def test_join():

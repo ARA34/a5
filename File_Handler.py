@@ -4,6 +4,12 @@ import ds_protocol as dsp
 import time
 import ds_messenger as dsm
 
+
+# Alex Reyes Aranda
+# areyesar@uci.edu
+# 69754988
+
+
 current_folder = Path(".").resolve()
 
 def create_profile_folder() -> str:

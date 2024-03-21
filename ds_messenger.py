@@ -4,6 +4,11 @@ import time
 from collections import namedtuple
 
 
+# Alex Reyes Aranda
+# areyesar@uci.edu
+# 69754988
+
+
 PORT = 3021
 OK = "ok"
 ERROR = "error"
