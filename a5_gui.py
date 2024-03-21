@@ -354,6 +354,6 @@ def main_function():
     app.load_assets()
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
-    # id = main.after(2000, app.check_new)
-    # print(f"ID: {id}")
+    id = main.after(2000, app.check_new)
+    print(f"ID: {id}")
     main.mainloop()
