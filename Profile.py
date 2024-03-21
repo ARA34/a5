@@ -171,7 +171,10 @@ class Profile:
         Uses the function from ds_messenger to retrieve all messages.
         """
         dsm = DirectMessenger(dsuserver=self.dsuserver,username=self.username,password=self.password)
-        self.all_messages = dsm.retrieve_all()
+        if dsm.join():
+            self.all_messages = dsm.retrieve_all()
+        else:
+            self.all_messages = self.all_messages
 
     def save_profile(self, path: str) -> None:
         p = Path(path)

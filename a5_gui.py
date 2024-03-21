@@ -191,7 +191,7 @@ class MainApp(tk.Frame):
         print("send pressed")
         print(f"server after pressed: {self.server}")
         message = self.body.get_text_entry()
-        if self.server is None:
+        if self.direct_messenger.dsuserver is None:
             print("WARNING: You must create new or load a profile first.")
             return
         else:
@@ -215,6 +215,9 @@ class MainApp(tk.Frame):
                 self.profile.add_friend(contact)
 
     def recipient_selected(self, recipient):
+        """
+        displays particular messages for a selected friend user
+        """
         self.recipient = recipient
         self.body.delete_everything()
         recp = self.recipient
@@ -241,20 +244,8 @@ class MainApp(tk.Frame):
             if ud.pwd != "":
                 self.password = ud.pwd
                 self.profile.password = ud.pwd
-            print(f"Before config server: {self.profile}")
+            print(f"last am: {self.profile.all_messages}")
             self.profile.save_profile(fh.get_profile_path(self.direct_messenger.username))
-
-        # if self.server is not None and self.username is not None and self.password is not None and self.direct_messenger is None:
-        #     self.direct_messenger = DirectMessenger(dsuserver=self.server, username=self.username, password=self.password)
-        #     self.profile = Profile(dsuserver=self.server, username=self.username, password=self.password)
-        #     # check if user has already been created
-        #     if fh.user_exists(self.direct_messenger.username):
-        #         pass
-        #     else:
-        #         fh.create_profile(self.direct_messenger)
-        #     self.profile = Profile()
-        #     self.profile.load_profile(fh.get_profile_path(self.direct_messenger.username))
-        #     self.load_assets()
 
     def publish(self, message:str):
         # You must implement this!
@@ -265,13 +256,7 @@ class MainApp(tk.Frame):
         """
         Checks for new messages every 2 seconds.
         """
-        # print(f"self_direct: {self.direct_messenger}") # this is None
-        # print(f"self_profile: {self.profile}")
-
-        # its not entering this if because self.direct_messenger is None
-
         dsm_var = self.direct_messenger
-        # print(f"dsm: {dsm_var}")
 
         if self.loaded is True:
             continue_check = dsm_var.join()
@@ -367,7 +352,6 @@ class MainApp(tk.Frame):
         """
         Closes GUI and saves user information onto local machine
         """
-        print(f"profile: {self.profile}")
         self.profile.set_all_messages() # error because dsu sever invalid -> pass the error
         time.sleep(1) # buffer to load
         fh.store_profile(self.profile)
