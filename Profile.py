@@ -203,7 +203,8 @@ class Profile:
         if p.exists() and p.suffix == '.dsu':
             try:
                 f = open(p, 'r')
-                obj = json.load(f)
+                print(f"type: {type(f).__name__}")
+                obj = json.load(f) # converts string to json dict
                 self.username = obj['username']
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
