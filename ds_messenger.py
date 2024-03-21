@@ -58,6 +58,13 @@ class DirectMessage:
         sets the message attribute
         """
         self.message = message
+
+    def get_recipient(self):
+        return self.recipient
+
+    def get_message(self):
+        return self.message
+
     
     def format_dm(self, token):
         """
@@ -203,11 +210,16 @@ class DirectMessenger:
         """
         self.send(message="", recipient="new") # sets the data attribute to not None
         dict_messages = self.data
-
         output_messages = list(map(lambda d: d["message"], dict_messages))
         users = list(map(lambda d: d["from"], dict_messages))
-        output_list = list(map(lambda x,y: (x,y), users, output_messages))# list of tuples(user, messsage)
-        return output_list
+        output_list = list(map(lambda x,y: (x,y), users, output_messages)) # list of tuples(user, messsage)
+        output_list_2 = []
+        for tup in output_list:
+            n = DirectMessage()
+            n.set_recipient(tup[0])
+            n.set_message(tup[1])
+            output_list_2.append(n)
+        return output_list_2
 
     def retrieve_all(self) -> list:
         # must return a list of DirectMessage objects containing all messages
@@ -220,7 +232,13 @@ class DirectMessenger:
             output_messages = list(map(lambda d: d["message"], dict_messages)) # list of messages
             users = list(map(lambda d: d["from"], dict_messages)) # list of senders
             output_list = list(map(lambda x,y: (x,y), users, output_messages))
-            return output_list
+            output_list_2 = []
+            for tup in output_list:
+                n = DirectMessage()
+                n.set_recipient(tup[0])
+                n.set_message(tup[1])
+                output_list_2.append(n)
+            return output_list_2
         except Exception as ex:
             print(f"Error, something wrong, {ex}")
             return

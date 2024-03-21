@@ -173,6 +173,10 @@ class Profile:
         dsm = DirectMessenger(dsuserver=self.dsuserver,username=self.username,password=self.password)
         if dsm.join():
             self.all_messages = dsm.retrieve_all()
+            new_list = []
+            for i in self.all_messages:
+                new_list.append([i.get_recipient, i.get_message])
+            self.all_messages = new_list
         else:
             self.all_messages = self.all_messages
 

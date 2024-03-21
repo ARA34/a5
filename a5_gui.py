@@ -238,12 +238,12 @@ class MainApp(tk.Frame):
         if self.loaded is True:
             continue_check = dsm_var.join()
             if continue_check:
-                message_tup_lst = dsm_var.retrieve_new()
+                message_tup_lst = dsm_var.retrieve_new() # list of DirectMessages with ideally only one
                 print(f"General Message: {message_tup_lst}")
-                if len(message_tup_lst) >= 1:
+                if len(message_tup_lst) >= 1: # tup is DirectMessage
                     for tup in message_tup_lst:
-                        print(f"msg: {tup[1]}, sender: {tup[0]}")
-                        self.body.insert_contact_message(tup[0] + ": " + tup[1])
+                        print(f"msg: {tup.get_message}, sender: {tup.get_recipient}")
+                        self.body.insert_contact_message(tup.get_recipient + ": " + tup.get_message)
                     if self.profile is not None:
                         self.profile.set_new_messages()
             else:
