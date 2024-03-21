@@ -17,3 +17,7 @@ def test_dm():
 def test_retrieve():
     melonmusk2 = DirectMessenger(dsuserver=DSUSERVER, username="melonmusk2", password="XA123")
     assert melonmusk2.retrieve_all() is not None
+
+def test_retrivew_new():
+    melonmusk2 = DirectMessenger(dsuserver=DSUSERVER, username="melonmusk2", password="XA123")
+    assert melonmusk2.retrieve_new() is not None
