@@ -19,7 +19,8 @@ import ttkthemes
 class Body(tk.Frame):
     def __init__(self, root, recipient_selected_callback=None):
         tk.Frame.__init__(self, root)
-        self.root = root
+        self.root = ttkthemes.ThemedTk()
+        self.root.set_theme("black")
         self._contacts = [str]
         self._select_callback = recipient_selected_callback
         self._draw()
@@ -121,7 +122,8 @@ class Footer(tk.Frame):
 class NewContactDialog(tk.simpledialog.Dialog):
 
     def __init__(self, root, title=None, user=None, pwd=None, server=None):
-        self.root = root
+        self.root = ttkthemes.ThemedTk()
+        self.root.set_theme("black")
         self.server = server
         self.user = user
         self.pwd = pwd
@@ -160,8 +162,7 @@ class MainApp(tk.Frame):
 
     def __init__(self, root):
         tk.Frame.__init__(self, root)
-        self.root = ttkthemes.ThemedTk()
-        self.root.set_theme("black")
+        self.root = root
         self.username = None
         self.password = None
         self.server = None
@@ -292,7 +293,6 @@ class MainApp(tk.Frame):
             fh.create_profile(s_prof)
 
     def load_assets(self) -> None:
-        print("load")
         if self.profile is not None and self.direct_messenger is not None:
             if self.direct_messenger.join() is True:
                 for friend in self.profile.friends:
@@ -303,9 +303,12 @@ class MainApp(tk.Frame):
         """
         Closes GUI and saves user information onto local machine
         """
-        self.profile.set_all_messages()
-        time.sleep(1)
-        fh.store_profile(self.profile)
+        try:
+            self.profile.set_all_messages()
+            time.sleep(1)
+            fh.store_profile(self.profile)
+        except:
+            pass
         self.root.destroy()
 
     def _draw(self):

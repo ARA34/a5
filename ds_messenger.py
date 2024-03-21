@@ -70,7 +70,6 @@ class DirectMessage:
     def get_message(self):
         return self.message
 
-    
     def format_dm(self, token):
         """
         formats json_msg so that it can send a dm or request the latest dm or all the dms
