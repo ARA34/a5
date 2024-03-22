@@ -59,6 +59,9 @@ def extract_json(json_msg: str) -> msg_info:
 
 
 def join(dsm_object: dsm.DirectMessenger):
+    """
+    Connects and joins user to server.
+    """
     username = dsm_object.username.strip()
     if username != "" and len(username) > 1:
         return dsm_object.join()
@@ -67,6 +70,9 @@ def join(dsm_object: dsm.DirectMessenger):
  
 
 def post(dsm_object: dsm.DirectMessenger, message: str):
+    """
+    Posts user's messages on server.
+    """
     message = message.strip()
     if message != "" and len(message) > 1:
         print(f"Your message [{message}] was posted")
@@ -76,6 +82,9 @@ def post(dsm_object: dsm.DirectMessenger, message: str):
 
 
 def bio(dsm_object: dsm.DirectMessenger, bio: str):
+    """
+    Changes user's bio
+    """
     bio = bio.strip()
     if bio != "" and len(bio) > 1:
         print(f"Your bio was changed to [{bio}]")
@@ -85,16 +94,27 @@ def bio(dsm_object: dsm.DirectMessenger, bio: str):
         print("You cannot have an empty or only whitespace bio or single character. Please try again.")
         dsm_object.send(message="", recipient=None)
 
+
 def dm(dsm_object: dsm.DirectMessenger, message: str, recipient: str):
+    """
+    Sends a direct message
+    """
     message = message.strip()
     if message != "" and len(message) > 1:
         return dsm_object.send(message=message, recipient=recipient)
     else:
         print("You cannot post empty or whitespace only posts or single character. Please Try again.")
 
+
 def request_messages(dsm_object: dsm.DirectMessenger, recipient: str):
-    recipient = recipient.strip()
-    if recipient != "" and len(recipient) > 1:
-        dsm_object.send(message="", recipient=recipient)
+    """
+    Extracs new or all message(s)
+    """
+    if recipient == "new" or recipient == "all":
+        if recipient == "new":
+            dsm_object.retrieve_new()
+        elif recipient == "all":
+            dsm_object.retrieve_all()
     else:
-        print("The recipient cannot be whitespace or a single character. Please try again.")
+        print("Can only enter 'new' or 'all' for recipient parameter")
+        return False

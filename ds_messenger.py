@@ -13,7 +13,7 @@ PORT = 3021
 OK = "ok"
 ERROR = "error"
 Connection = namedtuple("Connection", ["socket", "send", "recv"])
-msg_info = namedtuple('msg_info', ['type','message','token'])
+msg_info = namedtuple('msg_info', ['type', 'message', 'token'])
 
 
 def extract_json(json_msg: str) -> msg_info:
@@ -41,7 +41,7 @@ def extract_json(json_msg: str) -> msg_info:
             token = json_obj["response"]["token"]
             msg_info_1 = msg_info(type, message_list, token)
     except json.JSONDecodeError:
-      print("Json cannot be decoded.")
+        print("Json cannot be decoded.")
     return msg_info_1
 
 
@@ -72,17 +72,19 @@ class DirectMessage:
 
     def format_dm(self, token):
         """
-        formats json_msg so that it can send a dm or request the latest dm or all the dms
+        formats json_msg so that it can
+        send a dm or request the latest dm or all the dms
         """
         if self.recipient == "new":
             json_msg = {"token": token, "directmessage": "new"}
         elif self.recipient == "all":
             json_msg = {"token": token, "directmessage": "all"}
         else:
-            json_msg = {"token":token,
-                                "directmessage": {"entry": self.message,
-                                                  "recipient":self.recipient,
-                                                  "timestamp": str(time.time())}}
+            json_msg = {"token": token,
+                        "directmessage": {"entry": self.message,
+                                          "recipient": self.recipient,
+                                          "timestamp":
+                                          str(time.time())}}
         return json_msg
 
 
@@ -98,13 +100,13 @@ class DirectMessenger:
         self.password = password
         self.bio = ""
         self.data = None
-        
+
     def get_conn(self) -> None:
         """
         Sets _conn connection attribute
         """
         return self._conn
-    
+
     def set_bio(self, bio: str) -> None:
         """
         sets bio attribute
@@ -122,43 +124,47 @@ class DirectMessenger:
         print(self.data)
         print(self._conn)
 
-    def send(self, message:str, recipient:str) -> bool:
+    def send(self, message: str, recipient: str) -> bool:
         """
         General sending function to commuicate with server.
-        must return true if message successfully sent, false if send failed.
+        must return true if message successfully sent,
+        false if send failed.
         """
         try:
             sock = self.connect_server(self.dsuserver, PORT)
             if sock is None:
                 print("Couldn't connect to server")
                 return
-            self.init_conn(sock) # _conn is set
-            self.set_token() # token is set
+            self.init_conn(sock)
+            self.set_token()
             sending_two = False
-            
-            if ((self.username and self.password != "") 
+
+            if ((self.username and self.password != "")
                 and (message == "")
                 and self.bio == ""
                 and recipient is None):
                 # joining server
                 json_msg = {"join":
                             {"username": self.username,
-                            "password": self.password,
-                            "token": ""}}
+                             "password": self.password,
+                             "token": ""}}
             elif (message != ""
                   and self.bio is None
                   and recipient is None):
                 # posting message
                 json_msg = {"token": self.token,
-                            "post": {"entry": message,
+                            "post": {"entry":
+                                     message,
                                      "timestamp": str(time.time())}}
             elif (message == ""
                   and self.bio != ""
                   and recipient is None):
                 # changing bio
                 json_msg = {"token": self.token,
-                            "bio": {"entry": self.bio,
-                                    "timestamp": str(time.time())}}
+                            "bio": {"entry":
+                                    self.bio,
+                                    "timestamp":
+                                    str(time.time())}}
             elif recipient is not None:
                 # sending dm (to recipient) or recieving dm(s)(for you)
                 direct_message = DirectMessage()
@@ -168,14 +174,18 @@ class DirectMessenger:
 
             elif message != "" and self.bio != "":
                 sending_two = True
-            
+
             if sending_two:
                 json_msg_1 = {"token": self.token,
-                          "post": {"entry": message,
-                                   "timestamp": str(time.time())}}
+                              "post": {"entry":
+                                       message,
+                                       "timestamp":
+                                       str(time.time())}}
                 json_msg_2 = {"token": self.token,
-                          "bio": {"entry": self.bio,
-                                  "timestamp": str(time.time())}}
+                              "bio": {"entry":
+                                      self.bio,
+                                      "timestamp":
+                                      str(time.time())}}
                 json_msg_1 = json.dumps(json_msg_1)
                 self.write_command(json_msg_1)
                 response_1 = self.read_command()
@@ -191,7 +201,6 @@ class DirectMessenger:
                 else:
                     satisfy = ERROR
             else:
-                print(json_msg) # printing the json message
                 json_msg = json.dumps(json_msg)
                 self.write_command(json_msg)
                 response = self.read_command()
@@ -206,17 +215,23 @@ class DirectMessenger:
             return ("An error occured while sending. ", ex)
 
     def join(self):
-        return self.send(message="",recipient=None)
+        """
+        joins user
+        """
+        return self.send(message="", recipient=None)
 
     def retrieve_new(self) -> list:
         """
         Retrives list of new messages being sent to user
         """
-        self.send(message="", recipient="new") # sets the data attribute to not None
+        self.send(message="",
+                  recipient="new")
         dict_messages = self.data
-        output_messages = list(map(lambda d: d["message"], dict_messages))
+        output_messages = list(map(lambda d: d["message"],
+                                   dict_messages))
         users = list(map(lambda d: d["from"], dict_messages))
-        output_list = list(map(lambda x,y: (x,y), users, output_messages)) # list of tuples(user, messsage)
+        output_list = list(map(lambda x, y: (x, y),
+                               users, output_messages))
         output_list_2 = []
         for tup in output_list:
             n = DirectMessage()
@@ -226,16 +241,18 @@ class DirectMessenger:
         return output_list_2
 
     def retrieve_all(self) -> list:
-        # must return a list of DirectMessage objects containing all messages
         """
         retrives all messages ever to be sent to this user as well as senders
         """
-        self.send(message="", recipient="all") # gets data from server
+        self.send(message="", recipient="all")
         try:
             dict_messages = self.data
-            output_messages = list(map(lambda d: d["message"], dict_messages)) # list of messages
-            users = list(map(lambda d: d["from"], dict_messages)) # list of senders
-            output_list = list(map(lambda x,y: (x,y), users, output_messages))
+            output_messages = list(map(lambda d: d["message"],
+                                       dict_messages))
+            users = list(map(lambda d: d["from"],
+                             dict_messages))
+            output_list = list(map(lambda x, y: (x, y),
+                                   users, output_messages))
             output_list_2 = []
             for tup in output_list:
                 n = DirectMessage()
@@ -249,7 +266,8 @@ class DirectMessenger:
 
     def init_conn(self, sock: socket) -> None:
         """
-        Creates a named tuple to organize client-side connection
+        Creates a named tuple to organize
+        client-side connection
         """
         try:
             f_send = sock.makefile("w")
@@ -290,12 +308,12 @@ class DirectMessenger:
         except Exception as ex:
             print(f"connect_server: {ex}")
             return None
-        
+
     def set_token(self) -> None:
         join_msg = {"join":
                     {"username": self.username,
-                    "password": self.password,
-                    "token": ""}}
+                     "password": self.password,
+                     "token": ""}}
         join_msg = json.dumps(join_msg)
         self.write_command(join_msg)
         resp = self.read_command()
