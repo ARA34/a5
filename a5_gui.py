@@ -423,19 +423,29 @@ def main_function():
     log_server = login_win.server
     log_user = login_win.user
     log_pass = login_win.pwd
-
+    
+    fh.create_profile_folder()
+    dir_path = Path(".").resolve() / "dsu_profiles"
+    assume_exists = dir_path / (log_user + ".dsu")
+    new_user = False
+    if not assume_exists.exists():
+        new_user = True
     app = MainApp(main)
     main.title("ICS 32 Distributed Social Messenger")
     main.geometry("720x480")
     main.option_add('*tearOff', False)
-
     app.direct_messenger = DirectMessenger(dsuserver=log_server,
                                            username=log_user,
                                            password=log_pass)
-    app.profile = Profile()
-    app.profile.load_profile(
+    if new_user:
+        s_prof = Profile(dsuserver=log_server,username=log_user,password=log_pass)
+        fh.create_profile(s_prof)
+    else:
+        app.profile = Profile()
+        app.profile.load_profile(
         fh.get_profile_path(app.direct_messenger.username))
-    app.load_assets()
+        app.load_assets()
+
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
     id = main.after(2000, app.check_new)
