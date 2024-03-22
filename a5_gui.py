@@ -423,7 +423,7 @@ def main_function():
     log_server = login_win.server
     log_user = login_win.user
     log_pass = login_win.pwd
-    
+
     fh.create_profile_folder()
     dir_path = Path(".").resolve() / "dsu_profiles"
     assume_exists = dir_path / (log_user + ".dsu")
@@ -438,7 +438,9 @@ def main_function():
                                            username=log_user,
                                            password=log_pass)
     if new_user:
-        s_prof = Profile(dsuserver=log_server,username=log_user,password=log_pass)
+        s_prof = Profile(dsuserver=log_server,
+                         username=log_user,
+                         password=log_pass)
         fh.create_profile(s_prof)
     else:
         app.profile = Profile()
