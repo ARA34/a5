@@ -419,7 +419,7 @@ class MainApp(tk.Frame):
 def main_function():
     main = tk.Tk()
 
-    login_win = NewContactDialog(main, title="login window")
+    login_win = NewContactDialog(main, title="Server: 168.235.86.101")
     log_server = login_win.server
     log_user = login_win.user
     log_pass = login_win.pwd
