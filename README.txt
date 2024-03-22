@@ -1,4 +1,4 @@
-First and foremost, please excuse the tremendously format of my code for it is in all majority not my fault.
+First and foremost, please excuse the tremendously and utterly horrendous format of my code for it is in all majority not my fault.
 We were forced to use the most tedious of style checkers to ensure our code would look extra ugly.
 
 
